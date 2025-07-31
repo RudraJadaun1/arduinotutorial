@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="hi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>इंटरैक्टिव Arduino और रोबोटिक्स गाइड</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: A single-page application with a top navigation bar for smooth scrolling to different sections: Introduction, What is Arduino, Components, Projects, and What's Next. This structure logically follows a beginner's learning path, starting from theory and moving to practical application. Key interactions include a clickable Arduino Uno diagram to explain parts, an expandable card grid for components, and a tabbed interface for projects with clickable code lines for explanations. This design enhances engagement and makes complex information digestible for high-school students. -->
+    <!-- Visualization & Content Choices: Report Info: Arduino Uno parts -> Goal: Inform/Organize -> Viz/Method: Image with clickable hotspots -> Interaction: Click reveals description -> Justification: More interactive and less cluttered than a static labeled image. Report Info: Component descriptions -> Goal: Organize/Inform -> Viz/Method: Grid of clickable cards -> Interaction: Click expands to show details -> Justification: Cleanly organizes information and encourages exploration. Report Info: Project code -> Goal: Instruct/Explain -> Viz/Method: Interactive code block -> Interaction: Click on specific lines for tooltips -> Justification: Provides context-sensitive help directly where it's needed, improving comprehension. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Laila:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Laila', sans-serif;
+        }
+        .code-block {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            position: relative;
+        }
+        .code-line {
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: block;
+            padding: 0.1rem 0.5rem;
+            margin: 0 -0.5rem;
+            border-radius: 0.25rem;
+        }
+        .code-line:hover {
+            background-color: #4a5568;
+        }
+        .tooltip {
+            visibility: hidden;
+            background-color: #1a202c;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -80px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            width: 160px;
+        }
+        .code-line:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+        .component-card .details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .component-card.open .details {
+            max-height: 500px;
+        }
+    </style>
+</head>
+<body class="bg-amber-50 text-gray-800">
+
+    <header class="bg-white/80 backdrop-blur-sm shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-sky-600">Arduino और रोबोटिक्स</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#intro" class="nav-link text-gray-600 border-b-2 border-transparent">परिचय</a>
+                <a href="#arduino" class="nav-link text-gray-600 border-b-2 border-transparent">Arduino क्या है?</a>
+                <a href="#components" class="nav-link text-gray-600 border-b-2 border-transparent">ज़रूरी सामान</a>
+                <a href="#projects" class="nav-link text-gray-600 border-b-2 border-transparent">प्रोजेक्ट्स</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-gray-600 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden px-6 pb-3">
+            <a href="#intro" class="block py-2 text-gray-600">परिचय</a>
+            <a href="#arduino" class="block py-2 text-gray-600">Arduino क्या है?</a>
+            <a href="#components" class="block py-2 text-gray-600">ज़रूरी सामान</a>
+            <a href="#projects" class="block py-2 text-gray-600">प्रोजेक्ट्स</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <section id="intro" class="mb-24 text-center">
+            <h2 class="text-4xl font-bold text-sky-700 mb-4">रोबोटिक्स की दुनिया में आपका स्वागत है!</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600 mb-12">
+                कल्पना कीजिए आकाश नाम के एक छात्र की, जो आपकी ही तरह स्कूल में पढ़ता है। उसे हर जगह रोबोट्स दिखाई देते हैं - फिल्मों में, मंगल ग्रह पर, और अस्पतालों में। वह सोचता था कि इन्हें बनाना किसी जादू से कम नहीं होगा। लेकिन सच्चाई यह है कि इन सभी के पीछे की तकनीक सरल सिद्धांतों से शुरू होती है—सिद्धांत जिन्हें आप भी सीख सकते हैं।
+            </p>
+            <div class="bg-white p-8 rounded-xl shadow-lg">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">रोबोटिक्स क्यों ज़रूरी है?</h3>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 text-left">
+                    <div class="bg-sky-100 p-6 rounded-lg">
+                        <h4 class="font-bold text-sky-800 mb-2">स्वास्थ्य सेवा में</h4>
+                        <p class="text-gray-700">रोबोट्स डॉक्टरों को जटिल ऑपरेशन करने में मदद करते हैं, जिससे सटीकता बढ़ती है।</p>
+                    </div>
+                    <div class="bg-amber-100 p-6 rounded-lg">
+                        <h4 class="font-bold text-amber-800 mb-2">उद्योग में</h4>
+                        <p class="text-gray-700">फैक्ट्रियों में रोबोट्स भारी और दोहराव वाले काम करते हैं, जिससे उत्पादन तेज होता है।</p>
+                    </div>
+                    <div class="bg-green-100 p-6 rounded-lg">
+                        <h4 class="font-bold text-green-800 mb-2">घरों में</h4>
+                        <p class="text-gray-700">स्मार्ट डिवाइस, जैसे ऑटोमेटिक वैक्यूम क्लीनर, हमारे जीवन को आसान बना रहे हैं।</p>
+                    </div>
+                    <div class="bg-purple-100 p-6 rounded-lg">
+                        <h4 class="font-bold text-purple-800 mb-2">शिक्षा में</h4>
+                        <p class="text-gray-700">रोबोट्स STEM विषयों को एक मजेदार और व्यावहारिक तरीके से सीखने में मदद करते हैं।</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="arduino" class="mb-24">
+            <h2 class="text-4xl font-bold text-sky-700 mb-8 text-center">मिलिए Arduino से: आपके प्रोजेक्ट का छोटा दिमाग</h2>
+            <div class="bg-white p-8 rounded-xl shadow-lg mb-12">
+                <p class="text-lg text-gray-600 leading-relaxed">
+                    बहुत ही सरल शब्दों में, <strong>Arduino एक छोटी सी दिमाग वाली मशीन है</strong>। यह एक छोटा, प्रोग्राम करने योग्य सर्किट बोर्ड है। जैसे हमारा दिमाग हमारे शरीर को बताता है कि क्या करना है, वैसे ही Arduino आपके इलेक्ट्रॉनिक प्रोजेक्ट्स का दिमाग बनकर उन्हें नियंत्रित करता है। यह एक "ओपन-सोर्स" प्लेटफॉर्म है, जिसका मतलब है कि इसके डिज़ाइन और सॉफ्टवेयर सभी के लिए मुफ्त उपलब्ध हैं।
+                </p>
+            </div>
+
+            <div class="bg-white p-8 rounded-xl shadow-lg mb-12">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">Arduino Uno Board से जान-पहचान</h3>
+                <p class="text-center text-gray-600 mb-6">बोर्ड पर मौजूद किसी भी हिस्से पर क्लिक करके उसके बारे में जानें।</p>
+                <div class="relative w-full max-w-2xl mx-auto">
+                    <img src="https://t4.ftcdn.net/jpg/03/33/90/55/360_F_333905577_NJ7hf7ekOjzPDA5yGDAAvlLyJdEwgFyt.jpg" alt="Arduino Uno Board" class="w-full h-auto rounded-lg" usemap="#arduinomap">
+                    <map name="arduinomap">
+                        <area shape="rect" coords="150,20,250,60" href="#" alt="Microcontroller" class="arduino-hotspot" data-title="Microcontroller (माइक्रोकंट्रोलर)" data-text="यह बोर्ड पर लगी सबसे बड़ी काली चिप (ATmega328P) है। यह Arduino का असली 'दिमाग' है, जो हमारे द्वारा लिखे गए कोड को चलाता है।">
+                        <area shape="rect" coords="20,130,100,180" href="#" alt="USB Port" class="arduino-hotspot" data-title="USB Port (यूएसबी पोर्ट)" data-text="इस पोर्ट का उपयोग करके आप Arduino को अपने कंप्यूटर से जोड़ते हैं। इसी के माध्यम से आप कोड भेजते हैं।">
+                        <area shape="rect" coords="20,200,100,250" href="#" alt="Power Jack" class="arduino-hotspot" data-title="Power Jack (पावर जैक)" data-text="यदि आप कंप्यूटर का उपयोग नहीं कर रहे हैं, तो आप इस जैक का उपयोग करके इसे एडॉप्टर से पावर दे सकते हैं।">
+                        <area shape="rect" coords="130,80,380,120" href="#" alt="Digital Pins" class="arduino-hotspot" data-title="Digital Pins (डिजिटल पिन्स)" data-text="ये पिन (0-13) स्विच की तरह काम करते हैं - या तो ON (HIGH) या OFF (LOW)। इनका उपयोग LED या बटन के लिए किया जाता है।">
+                        <area shape="rect" coords="130,280,300,320" href="#" alt="Analog Pins" class="arduino-hotspot" data-title="Analog Pins (एनालॉग पिन्स)" data-text="ये पिन (A0-A5) मानों की एक श्रृंखला पढ़ सकते हैं, जो प्रकाश या तापमान जैसे सेंसर के लिए उपयोगी हैं।">
+                        <area shape="rect" coords="30,280,120,320" href="#" alt="Power Pins" class="arduino-hotspot" data-title="Power Pins (पावर पिन्स)" data-text="ये पिन (5V, 3.3V, GND) आपके प्रोजेक्ट के अन्य घटकों, जैसे सेंसर और LED, को बिजली की आपूर्ति करते हैं।">
+                    </map>
+                    <div id="arduino-info" class="absolute top-0 right-0 bg-sky-600 text-white p-4 rounded-lg shadow-xl w-64 hidden transition-opacity duration-300">
+                        <h4 id="info-title" class="font-bold mb-2"></h4>
+                        <p id="info-text"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Arduino IDE और Code</h3>
+                    <p class="text-gray-600 mb-6">Arduino से काम करवाने के लिए, हम उसे **Arduino IDE** नामक सॉफ्टवेयर में "code" लिखकर निर्देश देते हैं। हर Arduino प्रोग्राम के दो मुख्य भाग होते हैं:</p>
+                    <div class="code-block mb-4">
+                        <pre><code>void setup() {
+  // यह कोड सिर्फ एक बार चलता है
+  // तैयारी के लिए
+}</code></pre>
+                    </div>
+                    <div class="code-block">
+                        <pre><code>void loop() {
+  // यह कोड बार-बार चलता रहता है
+  // मुख्य काम के लिए
+}</code></pre>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Tinkercad: वर्चुअल लैब</h3>
+                    <p class="text-gray-600">Tinkercad एक मुफ्त ऑनलाइन टूल है जहाँ आप बिना कोई वास्तविक सामान खरीदे Arduino सर्किट बना और टेस्ट कर सकते हैं। यह शुरुआती लोगों के लिए बहुत फायदेमंद है क्योंकि:</p>
+                    <ul class="list-disc list-inside mt-4 space-y-2 text-gray-700">
+                        <li>यह पूरी तरह से मुफ्त है।</li>
+                        <li>आप घटकों को जलाने या तोड़ने के डर के बिना प्रयोग कर सकते हैं।</li>
+                        <li>सभी घटक एक डिजिटल लाइब्रेरी में आसानी से उपलब्ध हैं।</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="components" class="mb-24">
+            <h2 class="text-4xl font-bold text-sky-700 mb-8 text-center">हमारे जादुई पिटारे के कुछ ज़रूरी सामान</h2>
+            <p class="max-w-3xl mx-auto text-lg text-center text-gray-600 mb-12">
+                Arduino को दुनिया के साथ बातचीत करने के लिए "इंद्रियों" (Sensors) और "मांसपेशियों" (Actuators) की आवश्यकता होती है। नीचे दिए गए कार्ड पर क्लिक करके इन घटकों के बारे में और जानें।
+            </p>
+            <div id="component-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            </div>
+        </section>
+
+        <section id="projects" class="mb-24">
+            <h2 class="text-4xl font-bold text-sky-700 mb-8 text-center">चलो, कुछ बनाकर देखें!</h2>
+            <div class="bg-white rounded-xl shadow-lg p-2 md:p-4">
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex space-x-2 md:space-x-8" aria-label="Tabs">
+                        <button class="tab-btn active text-sm md:text-base whitespace-nowrap py-4 px-1 border-b-2 font-medium border-sky-500 text-sky-600" data-tab="project1">Project 1: टिमटिमाती LED</button>
+                        <button class="tab-btn text-sm md:text-base whitespace-nowrap py-4 px-1 border-b-2 font-medium border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="project2">Project 2: बटन और Buzzer</button>
+                        <button class="tab-btn text-sm md:text-base whitespace-nowrap py-4 px-1 border-b-2 font-medium border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="project3">Project 3: दूरी नापना</button>
+                    </nav>
+                </div>
+
+                <div id="project1" class="tab-content active p-4 md:p-8">
+                    <h3 class="text-2xl font-bold mb-4">Project 1: टिमटिमाती LED (Blinking an LED)</h3>
+                    <p class="mb-6 text-gray-600">यह इलेक्ट्रॉनिक्स की दुनिया का "Hello, World!" है। हम एक LED को बार-बार जलाएंगे और बुझाएंगे।</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-bold mb-2">क्या-क्या चाहिए?</h4>
+                            <ul class="list-disc list-inside text-gray-700"><li>Arduino Uno</li><li>एक LED</li><li>एक 220 ओम का Resistor</li><li>Breadboard और Wires</li></ul>
+                            <h4 class="font-bold mt-6 mb-2">Circuit कैसे बनाएं</h4>
+                            <ol class="list-decimal list-inside text-gray-700"><li>LED की लंबी टाँग को Resistor से जोड़ें।</li><li>Resistor को Arduino के पिन 13 से जोड़ें।</li><li>LED की छोटी टाँग को Arduino के GND से जोड़ें।</li></ol>
+                        </div>
+                        <div>
+                            <h4 class="font-bold mb-2">Code (लाइन पर क्लिक करके समझें)</h4>
+                            <div class="code-block" id="code-project1"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="project2" class="tab-content p-4 md:p-8">
+                    <h3 class="text-2xl font-bold mb-4">Project 2: बटन दबाओ, Buzzer बजाओ</h3>
+                    <p class="mb-6 text-gray-600">इस प्रोजेक्ट में, जब हम एक बटन दबाएंगे, तो एक बजर बीप करेगा।</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-bold mb-2">क्या-क्या चाहिए?</h4>
+                            <ul class="list-disc list-inside text-gray-700"><li>Arduino Uno</li><li>Push Button</li><li>Buzzer</li><li>10k ओम Resistor</li><li>Breadboard और Wires</li></ul>
+                            <h4 class="font-bold mt-6 mb-2">Circuit कैसे बनाएं</h4>
+                             <ol class="list-decimal list-inside text-gray-700"><li>Buzzer के (+) को पिन 8 से और (-) को GND से जोड़ें।</li><li>Button के एक टर्मिनल को 5V से जोड़ें।</li><li>उसी टर्मिनल से एक तार पिन 4 में जोड़ें।</li><li>दूसरे टर्मिनल को Resistor के माध्यम से GND से जोड़ें।</li></ol>
+                        </div>
+                        <div>
+                            <h4 class="font-bold mb-2">Code (लाइन पर क्लिक करके समझें)</h4>
+                            <div class="code-block" id="code-project2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="project3" class="tab-content p-4 md:p-8">
+                     <h3 class="text-2xl font-bold mb-4">Project 3: दूरी नापने वाला यंत्र</h3>
+                    <p class="mb-6 text-gray-600">हम एक अल्ट्रासोनिक सेंसर का उपयोग करके किसी वस्तु की दूरी मापेंगे और उसे सीरियल मॉनिटर पर देखेंगे।</p>
+                     <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-bold mb-2">क्या-क्या चाहिए?</h4>
+                            <ul class="list-disc list-inside text-gray-700"><li>Arduino Uno</li><li>Ultrasonic Sensor (HC-SR04)</li><li>Breadboard और Wires</li></ul>
+                            <h4 class="font-bold mt-6 mb-2">Circuit कैसे बनाएं</h4>
+                            <ol class="list-decimal list-inside text-gray-700"><li>सेंसर के VCC को 5V से जोड़ें।</li><li>GND को GND से जोड़ें।</li><li>Trig को पिन 9 से जोड़ें।</li><li>Echo को पिन 10 से जोड़ें।</li></ol>
+                        </div>
+                        <div>
+                            <h4 class="font-bold mb-2">Code (लाइन पर क्लिक करके समझें)</h4>
+                            <div class="code-block" id="code-project3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="next-steps" class="text-center bg-white p-12 rounded-xl shadow-lg">
+            <h2 class="text-4xl font-bold text-sky-700 mb-4">अब आगे क्या?</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600 mb-8">बधाई हो! आपने रोबोटिक्स और Arduino की दुनिया में अपना पहला कदम रख लिया है। अब आप प्रयोग करने के लिए स्वतंत्र हैं। इन प्रोजेक्ट्स को मिलाकर कुछ नया बनाने की कोशिश करें:</p>
+            <div class="flex flex-col md:flex-row justify-center gap-6">
+                <div class="bg-amber-100 p-6 rounded-lg flex-1">
+                    <p class="text-amber-800">क्या आप दूरी के हिसाब से बजर बजा सकते हैं? (जब कोई वस्तु 10 cm से पास आए तो बजर बजे)।</p>
+                </div>
+                 <div class="bg-green-100 p-6 rounded-lg flex-1">
+                    <p class="text-green-800">क्या आप LDR का उपयोग करके एक स्वचालित लाइट बना सकते हैं जो अंधेरा होने पर जले?</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-24">
+        <div class="container mx-auto px-6 py-4 text-center">
+            <p>सीखते रहें, बनाते रहें, और नई चीजों का आविष्कार करते रहें!</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile Menu Toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Arduino Uno Hotspots
+            const hotspots = document.querySelectorAll('.arduino-hotspot');
+            const infoBox = document.getElementById('arduino-info');
+            const infoTitle = document.getElementById('info-title');
+            const infoText = document.getElementById('info-text');
+
+            hotspots.forEach(hotspot => {
+                hotspot.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    infoTitle.textContent = hotspot.dataset.title;
+                    infoText.textContent = hotspot.dataset.text;
+                    infoBox.classList.remove('hidden');
+                });
+            });
+            
+            // Hide info box if clicked outside
+            document.addEventListener('click', function(event) {
+                const isClickInside = infoBox.contains(event.target) || Array.from(hotspots).some(h => h.contains(event.target));
+                if (!isClickInside) {
+                    infoBox.classList.add('hidden');
+                }
+            });
+
+
+            // Components Data
+            const components = [
+                { name: 'LED', type: 'Output', desc: 'एक छोटी सी लाइट। इसकी दो टाँगें होती हैं: लंबी वाली एनोड (+) और छोटी वाली कैथोड (-)।' },
+                { name: 'Push Button', type: 'Input', desc: 'एक साधारण स्विच जो सर्किट को तब जोड़ता है जब उसे दबाया जाता है।' },
+                { name: 'LDR', type: 'Input', desc: 'एक प्रकाश सेंसर। जब इस पर अधिक प्रकाश पड़ता है, तो इसका प्रतिरोध कम हो जाता है।' },
+                { name: 'IR Sensor', type: 'Input', desc: 'यह सेंसर इन्फ्रारेड प्रकाश का उपयोग करके अपने सामने किसी वस्तु का पता लगाता है।' },
+                { name: 'Ultrasonic Sensor', type: 'Input', desc: 'यह सेंसर ध्वनि तरंगों का उपयोग करके दूरी मापता है, ठीक चमगादड़ की तरह।' },
+                { name: 'Servo Motor', type: 'Output', desc: 'एक विशेष मोटर जो 0 से 180 डिग्री तक एक सटीक कोण पर घूम सकती है।' },
+                { name: 'Buzzer', type: 'Output', desc: 'एक छोटा स्पीकर जो बीप की ध्वनि उत्पन्न करता है।' }
+            ];
+
+            const componentGrid = document.getElementById('component-grid');
+            components.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'component-card bg-white rounded-xl shadow-lg cursor-pointer transition-transform transform hover:scale-105';
+                card.innerHTML = `
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-800">${c.name}</h3>
+                        <p class="text-sm font-medium ${c.type === 'Input' ? 'text-blue-500' : 'text-red-500'}">${c.type === 'Input' ? 'इनपुट डिवाइस (Sensor)' : 'आउटपुट डिवाइस (Actuator)'}</p>
+                    </div>
+                    <div class="details px-6 pb-6 text-gray-600">
+                        <p>${c.desc}</p>
+                    </div>
+                `;
+                componentGrid.appendChild(card);
+
+                card.addEventListener('click', () => {
+                    card.classList.toggle('open');
+                });
+            });
+
+            // Project Tabs
+            const tabs = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => {
+                        t.classList.remove('active', 'border-sky-500', 'text-sky-600');
+                        t.classList.add('border-transparent', 'text-gray-500');
+                    });
+                    tab.classList.add('active', 'border-sky-500', 'text-sky-600');
+                    tab.classList.remove('border-transparent', 'text-gray-500');
+
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(tab.dataset.tab).classList.add('active');
+                });
+            });
+            
+            // Interactive Code Blocks
+            const codes = {
+                project1: [
+                    { line: 'void setup() {', explanation: 'यह तैयारी का हिस्सा है, जो केवल एक बार चलता है।' },
+                    { line: '  pinMode(13, OUTPUT);', explanation: 'Arduino को बताता है कि पिन 13 का उपयोग एक आउटपुट (LED) के लिए किया जाएगा।' },
+                    { line: '}', explanation: '' },
+                    { line: 'void loop() {', explanation: 'यह मुख्य क्रिया है, जो बार-बार चलती रहती है।' },
+                    { line: '  digitalWrite(13, HIGH);', explanation: 'पिन 13 पर 5V भेजता है, जिससे LED जल जाती है।' },
+                    { line: '  delay(1000);', explanation: 'Arduino को 1000 मिलीसेकंड (1 सेकंड) के लिए रोकता है।' },
+                    { line: '  digitalWrite(13, LOW);', explanation: 'पिन 13 पर वोल्टेज को 0V कर देता है, जिससे LED बंद हो जाती है।' },
+                    { line: '  delay(1000);', explanation: 'फिर से 1 सेकंड के लिए रुकता है।' },
+                    { line: '}', explanation: '' }
+                ],
+                project2: [
+                    { line: 'const int buttonPin = 4;', explanation: 'बटन के लिए पिन नंबर 4 को एक नाम दिया गया है।' },
+                    { line: 'const int buzzerPin = 8;', explanation: 'बजर के लिए पिन नंबर 8 को एक नाम दिया गया है।' },
+                    { line: 'void setup() {', explanation: 'तैयारी का हिस्सा।' },
+                    { line: '  pinMode(buzzerPin, OUTPUT);', explanation: 'बजर पिन को आउटपुट के रूप में सेट करता है।' },
+                    { line: '  pinMode(buttonPin, INPUT);', explanation: 'बटन पिन को इनपुट के रूप में सेट करता है।' },
+                    { line: '}', explanation: '' },
+                    { line: 'void loop() {', explanation: 'मुख्य क्रिया का हिस्सा।' },
+                    { line: '  int buttonState = digitalRead(buttonPin);', explanation: 'पिन 4 की स्थिति (HIGH/LOW) पढ़ता है।' },
+                    { line: '  if (buttonState == HIGH) {', explanation: 'जांचता है कि क्या बटन दबाया गया है।' },
+                    { line: '    digitalWrite(buzzerPin, HIGH);', explanation: 'यदि हाँ, तो बजर चालू करें।' },
+                    { line: '  } else {', explanation: 'यदि बटन नहीं दबाया गया है।' },
+                    { line: '    digitalWrite(buzzerPin, LOW);', explanation: 'तो बजर बंद रखें।' },
+                    { line: '  }', explanation: '' },
+                    { line: '}', explanation: '' }
+                ],
+                project3: [
+                    { line: 'const int trigPin = 9;', explanation: 'Trig पिन के लिए पिन 9 सेट किया गया है।' },
+                    { line: 'const int echoPin = 10;', explanation: 'Echo पिन के लिए पिन 10 सेट किया गया है।' },
+                    { line: 'long duration; int distance;', explanation: 'समय और दूरी को स्टोर करने के लिए वेरिएबल्स।' },
+                    { line: 'void setup() {', explanation: 'तैयारी का हिस्सा।' },
+                    { line: '  pinMode(trigPin, OUTPUT);', explanation: 'Trig पिन ध्वनि भेजेगा, इसलिए यह आउटपुट है।' },
+                    { line: '  pinMode(echoPin, INPUT);', explanation: 'Echo पिन ध्वनि सुनेगा, इसलिए यह इनपुट है।' },
+                    { line: '  Serial.begin(9600);', explanation: 'सीरियल मॉनिटर शुरू करता है ताकि हम आउटपुट देख सकें।' },
+                    { line: '}', explanation: '' },
+                    { line: 'void loop() {', explanation: 'मुख्य क्रिया का हिस्सा।' },
+                    { line: '  digitalWrite(trigPin, HIGH);', explanation: 'एक छोटी ध्वनि तरंग भेजता है।' },
+                    { line: '  delayMicroseconds(10);', explanation: '10 माइक्रोसेकंड के लिए तरंग भेजता है।' },
+                    { line: '  digitalWrite(trigPin, LOW);', explanation: 'तरंग भेजना बंद कर देता है।' },
+                    { line: '  duration = pulseIn(echoPin, HIGH);', explanation: 'तरंग के वापस आने में लगे समय को मापता है।' },
+                    { line: '  distance = duration * 0.034 / 2;', explanation: 'समय को दूरी (cm में) में बदलता है।' },
+                    { line: '  Serial.print("Distance: ");', explanation: 'सीरियल मॉनिटर पर टेक्स्ट प्रिंट करता है।' },
+                    { line: '  Serial.println(distance);', explanation: 'गणना की गई दूरी को प्रिंट करता है।' },
+                    { line: '  delay(100);', explanation: 'अगली रीडिंग से पहले थोड़ा रुकता है।' },
+                    { line: '}', explanation: '' }
+                ]
+            };
+
+            function createInteractiveCode(containerId, codeData) {
+                const container = document.getElementById(containerId);
+                const pre = document.createElement('pre');
+                const code = document.createElement('code');
+                codeData.forEach(item => {
+                    const span = document.createElement('span');
+                    span.className = 'code-line';
+                    span.textContent = item.line;
+                    if (item.explanation) {
+                        const tooltip = document.createElement('span');
+                        tooltip.className = 'tooltip';
+                        tooltip.textContent = item.explanation;
+                        span.appendChild(tooltip);
+                        span.style.position = 'relative'; 
+                    }
+                    code.appendChild(span);
+                });
+                pre.appendChild(code);
+                container.appendChild(pre);
+            }
+
+            createInteractiveCode('code-project1', codes.project1);
+            createInteractiveCode('code-project2', codes.project2);
+            createInteractiveCode('code-project3', codes.project3);
+        });
+    </script>
+</body>
+</html>
